@@ -1,0 +1,8 @@
+from urllib.request import urlopen
+import re
+import pandas as pd
+url = "https://www.mtbc.com/about-us/contact-us"
+page = urlopen(url)
+html_bytes = page.read()
+html = html_bytes.decode("utf-8")
+print(re.findall("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", html))
