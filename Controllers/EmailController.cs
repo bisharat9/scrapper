@@ -128,7 +128,35 @@ namespace emailsender.Controllers
             return View();
         }
         public ActionResult Crawler()
-        {
+        { 
+            string url = "https://www.mtbc.com/about-us/contact-us/";
+            WebProxy proxy = new WebProxy("http://172.16.0.22:8080") { UseDefaultCredentials = true }; ;
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+
+            // Set method to GET to retrieve data
+            request.Method = "GET";
+            request.Timeout = 6000; //60 second timeout
+            request.UserAgent = "Mozilla/5.0 (compatible; MSIE 9.0; Windows Phone OS 7.5; Trident/5.0; IEMobile/9.0)";
+            request.Proxy = proxy;
+
+            string Content;
+
+            // Get the Response
+            WebResponse response = request.GetResponse();
+            Stream data = response.GetResponseStream();
+            StreamReader sr = new StreamReader(data);
+            string html = sr.ReadToEnd();
+            string regex = @"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+";
+            System.Text.RegularExpressions.Regex ex = new System.Text.RegularExpressions.Regex(regex, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            //while (sr.ReadToEnd()!=null)
+            //{
+            //    EmailList email = new EmailList();
+                Content = ex.Match(html).Value.Trim();
+                ViewBag.html = Content;
+            //    email.Email = Content;
+            //    emails.Add(email);
+
+            //}
             return View();
         }
 
