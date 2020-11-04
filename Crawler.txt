@@ -1,0 +1,97 @@
+public ActionResult Crawler()
+        {
+
+            List<EmailList> emails = new List<EmailList>();
+            string url = "https://www.comsats.edu.pk/contactus.aspx";
+            WebProxy proxy = new WebProxy("http://172.16.0.22:8080") { UseDefaultCredentials = true };
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+
+            // Set method to GET to retrieve data
+            request.Method = "GET";
+            request.Timeout = 6000; //60 second timeout
+            request.UserAgent = "Mozilla/5.0 (compatible; MSIE 9.0; Windows Phone OS 7.5; Trident/5.0; IEMobile/9.0)";
+            request.Proxy = proxy;
+
+            string Content;
+
+            // Get the Response
+            WebResponse response = request.GetResponse();
+            Stream data = response.GetResponseStream();
+            StreamReader sr = new StreamReader(data);
+            string html = sr.ReadToEnd();
+            string regex = @"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+";
+            System.Text.RegularExpressions.Regex ex = new System.Text.RegularExpressions.Regex(regex, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            Content = ex.Match(html).Value.Trim();
+            using (WordDocument document = new WordDocument())
+            {
+                //Adds a section and a paragraph to the document
+                document.EnsureMinimal();
+                //Appends text to the last paragraph of the document
+                document.LastParagraph.AppendText(html);
+                //Saves the Word document to disk in DOCX format
+                var fileName = "Result.docx";
+                var filePath = Path.Combine(Server.MapPath("~/Document"), fileName);
+                document.Save(filePath);
+                sr = new StreamReader(Path.Combine(Server.MapPath("~/Document"), fileName));
+
+                while (sr !=null)
+                {
+                    string text = sr.ReadLine();
+                    Content = ex.Match(html).Value.Trim();
+                    EmailList m = new EmailList();
+                    m.Email = Content;
+                    if (Content != null)
+                    {
+                        if (emails.Count > 0)
+                        {
+                            if (emails.Find(x => x.Email == m.Email).ToString() == null)
+                            {
+                                emails.Add(m);
+                            }
+                        }
+                        else
+                        {
+                            emails.Add(m);
+
+                        }
+                        sr.Peek();
+                        //sr.BaseStream.Seek(0);
+                    }
+
+                }
+                WordDocument document1 = new WordDocument();
+                document1.EnsureMinimal();
+               
+            }
+
+            using (WordDocument document1 = new WordDocument())
+            {
+                document1.EnsureMinimal();
+                foreach (var e1 in emails)
+                {
+                    string em = e1.Email;
+                    document1.LastParagraph.AppendText(em);
+                }
+                //Saves the Word document to disk in DOCX format
+                var fileName1 = "Email.docx";
+                var filePath1 = Path.Combine(Server.MapPath("~/Document"), fileName1);
+                document1.Save(filePath1); 
+            }
+            
+
+                    //Stream data = response.GetResponseStream();
+                    //StreamReader sr = new StreamReader(data);
+                    //string html = sr.ReadToEnd();
+                    //string regex = @"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+";
+                    //System.Text.RegularExpressions.Regex ex = new System.Text.RegularExpressions.Regex(regex, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                    ////while (sr.ReadToEnd()!=null)
+                    ////{
+                    ////    EmailList email = new EmailList();
+                    //    Content = ex.Match(html).Value.Trim();
+                    //    ViewBag.html = Content;
+                    ////    email.Email = Content;
+                    ////    emails.Add(email);
+
+                    ////}
+                    return View();
+        }
