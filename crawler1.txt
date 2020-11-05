@@ -1,4 +1,4 @@
-public ActionResult Crawler()
+        public ActionResult Crawler()
         {
 
             List<EmailList> emails = new List<EmailList>();
@@ -14,7 +14,7 @@ public ActionResult Crawler()
 
             string Content;
             string regex = @"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+";
-            System.Text.RegularExpressions.Regex ex = new System.Text.RegularExpressions.Regex(regex, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            Regex ex = new Regex(regex, RegexOptions.IgnoreCase);
 
             // Get the Response
             WebResponse response = request.GetResponse();
@@ -41,41 +41,21 @@ public ActionResult Crawler()
 
                     }
                 }
-              
-               
-
             }
-            using (WordDocument document1 = new WordDocument())
+
+            string fileName1 =  "Email"+ DateTime.Now.ToString("h mm ss tt")+ ".txt";
+            var filePath1 = Path.Combine(Server.MapPath("~/Document"), fileName1);
+
+
+            using (StreamWriter outputFile = new StreamWriter(Path.Combine(Server.MapPath("~/Document"), fileName1)))
             {
-                document1.EnsureMinimal();
                 foreach (var e1 in emails)
                 {
-                    string em = e1.Email+'\n';
-                    document1.LastParagraph.AppendText(em);
+                    string em = e1.Email;
+                    outputFile.WriteLine(em);
                 }
-                //Saves the Word document to disk in DOCX format
-                var fileName1 = "Email.docx";
-                var filePath1 = Path.Combine(Server.MapPath("~/Document"), fileName1);
-                document1.Save(filePath1);
+            
             }
-
-
-
-
-
-            //Stream data = response.GetResponseStream();
-            //StreamReader sr = new StreamReader(data);
-            //string html = sr.ReadToEnd();
-            //string regex = @"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+";
-            //System.Text.RegularExpressions.Regex ex = new System.Text.RegularExpressions.Regex(regex, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-            ////while (sr.ReadToEnd()!=null)
-            ////{
-            ////    EmailList email = new EmailList();
-            //    Content = ex.Match(html).Value.Trim();
-            //    ViewBag.html = Content;
-            ////    email.Email = Content;
-            ////    emails.Add(email);
-
-            ////}
+            ViewBag.success = fileName1;
             return View();
         }
